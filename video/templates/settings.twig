@@ -1,0 +1,12 @@
+{% import "_includes/forms" as forms %}
+
+{% for handle, options in settings.formats %}
+	{{ forms.lightswitchField({
+	    label: "Allow " ~ options.name ~ " videos"|t,
+	    id: handle,
+	    name: handle,
+	    value: settings[handle],
+	    on: (settings[handle] is defined ? settings[handle] : "")
+	  })
+	}}
+{% endfor %}

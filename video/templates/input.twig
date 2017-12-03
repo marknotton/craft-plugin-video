@@ -1,0 +1,70 @@
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+	id: id,
+	name: name,
+	value: value.url ?? '',
+	placeholder: 'https://www.youtube.com/watch?v=-onYzz-M1cA',
+}) }}
+
+
+{% set myJs %}
+
+	var field = $('#{{namespace}}');
+	field.after('<div id="{{namespace}}-notice" style="margin: 2px 0 1em 0; color: #8f98a3; font-size:11px"><p></p></div>');
+
+	var notice = $('#{{namespace}}-notice p');
+
+	var regexes = {
+		{% for key, options in settings.formats %}
+			{{ key }}:{{options.regex|raw}},
+		{% endfor %}
+	};
+
+	{% set formats = settings.formats|keys %}
+
+	var enabled = {
+		{% for format in formats %}
+			{% if format != 'url' %}
+				{{format}} : {{ settings[format] ? 1 : 0}},
+			{% endif %}
+		{% endfor %}
+	};
+
+	field.data('old', field.val());
+
+	field.bind('propertychange change click keyup input cut blur paste', validate);
+
+	function validate() {
+		if (field.data('old') != field.val()) {
+
+			field.data('old', field.val());
+
+			var url = field.val();
+
+			if ( {{urlRegex}}.test(url) ) {
+
+				{% for format in formats %}
+					 {{ not loop.first ? 'else ' }}if ( checker(url, '{{format}}') ) {
+						notice.text('{{format|title}} URL detected' + (!enabled['{{format}}'] ? ' and {{format|title}} videos have been disabled for this field' : ''));
+					}
+				{% endfor %}
+
+				else {
+					notice.text('URL not valid');
+				}
+
+			} else {
+				notice.text('URL not valid');
+			}
+		}
+	}
+
+	function checker(url, format) {
+		var matches = regexes[format].exec(url);
+		return matches && matches[1];
+	}
+
+{% endset %}
+
+{% includeJs myJs %}
