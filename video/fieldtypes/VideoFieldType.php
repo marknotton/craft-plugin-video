@@ -3,8 +3,7 @@ namespace Craft;
 
 class VideoFieldType extends PlainTextFieldType {
 
-
-	public function getName()	{ return Craft::t('Video');}
+	public function getName()	{ return 'Video'; }
 
 	// To add more video formats, you should only need to add to this array. Everything else will be managed automatically
 	public $formats = array(
